@@ -21,10 +21,6 @@ HWND hEdit3;
 HWND hEdit4;
 
 TCHAR edit1[20], edit2[20], edit3[20], edit4[20];
-TCHAR aedit1[20] = { 'K', 'y', 'i', 'v', '\0'}, 
-aedit2[20], 
-aedit3[20], 
-aedit4[20];
 
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 
