@@ -1,6 +1,8 @@
 #include <windows.h>
 #include <tchar.h>
 #include "resource.h"
+#pragma comment(lib, "comctl32")
+#include <CommCtrl.h>
 
 int score = 0;
 HWND hButton1;
@@ -19,6 +21,14 @@ HWND hEdit1;
 HWND hEdit2;
 HWND hEdit3;
 HWND hEdit4;
+HWND hProg;
+HWND hResult;
+HWND hSpin1;
+HWND hSpin2;
+HWND hAnw1;
+HWND hAnw2;
+
+UDACCEL pAcceleration[3] = { {1,1}, {3,10}, {5,50} };
 
 TCHAR edit1[20], edit2[20], edit3[20], edit4[20];
 
@@ -51,10 +61,32 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wp, LPARAM lp)
 		hEdit2 = GetDlgItem(hWnd, IDC_EDIT2);
 		hEdit3 = GetDlgItem(hWnd, IDC_EDIT3);
 		hEdit4 = GetDlgItem(hWnd, IDC_EDIT4);
+		hProg = GetDlgItem(hWnd, IDC_PROGRESS1);
+		hResult = GetDlgItem(hWnd, IDC_RESULT);
+		hSpin1 = GetDlgItem(hWnd, IDC_SPIN1);
+		hSpin2 = GetDlgItem(hWnd, IDC_SPIN2);
+		hAnw1 = GetDlgItem(hWnd, IDC_ANSWER1);
+		hAnw2 = GetDlgItem(hWnd, IDC_ANSWER2);
+		hProg = GetDlgItem(hWnd, IDC_PROGRESS1);
+		SendMessage(hProg, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+		SendMessage(hProg, PBM_SETPOS, 0, 0);
+		SendMessage(hProg, PBM_SETBKCOLOR, 0, LPARAM(RGB(255, 0, 0)));
+		SendMessage(hProg, PBM_SETBARCOLOR, 0, LPARAM(RGB(0, 255, 0)));
+		SendMessage(hSpin1, UDM_SETRANGE32, 0, 10000);
+		SendMessage(hSpin2, UDM_SETRANGE32, 0, 10000);
+		SendMessage(hSpin1, UDM_SETACCEL, 3, LPARAM(pAcceleration));
+		SendMessage(hSpin2, UDM_SETACCEL, 3, LPARAM(pAcceleration));
+		SendMessage(hSpin1, UDM_SETBUDDY, WPARAM(hAnw1), 0);
+		SendMessage(hSpin2, UDM_SETBUDDY, WPARAM(hAnw2), 0);
+		SetWindowText(hAnw1, TEXT("0"));
+		SetWindowText(hAnw2, TEXT("0"));
+		ShowWindow(hProg, SW_HIDE);
 		return TRUE;
 	case WM_COMMAND:
 		if (LOWORD(wp) == IDC_BUTTON1)
 		{
+			int anw1 = SendMessage(hSpin1, UDM_GETPOS32, 0, 0);
+			int anw2 = SendMessage(hSpin2, UDM_GETPOS32, 0, 0);
 			LRESULT lResult1 = SendMessage(hButton1, BM_GETCHECK, 0, 0);
 			LRESULT lResult2 = SendMessage(hButton2, BM_GETCHECK, 0, 0);
 			LRESULT lResult3 = SendMessage(hButton3, BM_GETCHECK, 0, 0);
@@ -72,45 +104,52 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wp, LPARAM lp)
 			GetWindowText(hEdit3, edit3, 20);
 			GetWindowText(hEdit4, edit4, 20);
 			if (lResult1 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult2 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult3 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult4 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult5 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult6 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult7 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult8 == BST_CHECKED)
-				score += 10;
+				score += 1;
 			if (lResult9 == BST_CHECKED && lResult10 == BST_CHECKED)
 			{
 				LRESULT check1 = SendDlgItemMessage(hWnd, IDC_CHECK2, BM_GETCHECK, 0, 0);
 				if (check1 != BST_CHECKED)
-					score += 10;
+					score += 1;
 			}
 			if (lResult11 == BST_CHECKED && lResult12 == BST_CHECKED)
 			{
 				LRESULT check1 = SendDlgItemMessage(hWnd, IDC_CHECK5, BM_GETCHECK, 0, 0);
 				LRESULT check2 = SendDlgItemMessage(hWnd, IDC_CHECK6, BM_GETCHECK, 0, 0);
 				if (check1 != BST_CHECKED && check2 != BST_CHECKED)
-					score += 10;
+					score += 1;
 			}
 			if (!lstrcmp(edit1,TEXT("Киев")))
-				score += 10;
+				score += 1;
 			if (!lstrcmp(edit2,TEXT("4")))
-				score += 10;
+				score += 1;
 			if (!lstrcmp(edit3,TEXT("Я")))
-				score += 10;
+				score += 1;
 			if (!lstrcmp(edit4,TEXT("4")))
-				score += 10;
+				score += 1;
+			if(anw1 == 88)
+				score += 1;
+			if(anw2 == 1998)
+				score += 1;
 			TCHAR buf[50];
-			wsprintf(buf, TEXT("Ваша оценка: %d"), score);
-			MessageBox(hWnd, buf, TEXT("Результат"), MB_OK);
+			int proc = score * 100 / 16;
+			wsprintf(buf, TEXT("Ваша оценка: %d балов"), proc);
+			SetWindowText(hResult, buf);
+			SendMessage(hProg, PBM_SETPOS, WPARAM(proc), 0);
+			ShowWindow(hProg, SW_SHOW);
 			score = 0;
 		}
 		return TRUE;
