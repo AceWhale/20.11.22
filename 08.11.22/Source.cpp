@@ -27,6 +27,7 @@ HWND hSpin1;
 HWND hSpin2;
 HWND hAnw1;
 HWND hAnw2;
+HANDLE Th1;
 
 UDACCEL pAcceleration[3] = { {1,1}, {3,10}, {5,50} };
 
@@ -40,11 +41,30 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPTSTR lpszCmdLin
 	return  DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, (DLGPROC)DlgProc);
 }
 
+DWORD WINAPI Thread1(LPVOID lp)
+{
+	int time = 10;
+	while (true)
+	{
+		static _TCHAR str[100];
+		wsprintf(str, TEXT("Осталось времени: %d секунд"), time);
+		SetWindowText((HWND)lp, str);
+		time--;
+		Sleep(1000);
+		str[lstrlen(str)] = '\0';
+		if (time == 0)
+			break;
+	}
+	MessageBox((HWND)lp, TEXT("Время вышло"), TEXT("Тест"), MB_OK);
+	EndDialog((HWND)lp, 0);
+}
+
 BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wp, LPARAM lp)
 {
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		Th1 = CreateThread(NULL, 0, Thread1, hWnd, 0, NULL);
 		hButton1 = GetDlgItem(hWnd, IDC_RADIO2);
 		hButton2 = GetDlgItem(hWnd, IDC_RADIO5);
 		hButton3 = GetDlgItem(hWnd, IDC_RADIO9);
@@ -85,6 +105,7 @@ BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wp, LPARAM lp)
 	case WM_COMMAND:
 		if (LOWORD(wp) == IDC_BUTTON1)
 		{
+			TerminateThread(Th1, 0);
 			int anw1 = SendMessage(hSpin1, UDM_GETPOS32, 0, 0);
 			int anw2 = SendMessage(hSpin2, UDM_GETPOS32, 0, 0);
 			LRESULT lResult1 = SendMessage(hButton1, BM_GETCHECK, 0, 0);
