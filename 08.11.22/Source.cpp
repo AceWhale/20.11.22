@@ -43,6 +43,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPTSTR lpszCmdLin
 
 DWORD WINAPI Thread1(LPVOID lp)
 {
+	DWORD prior_proc = GetPriorityClass(GetCurrentProcess());
+	DWORD prior_thread = GetPriorityClass(GetCurrentThread());
+	SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 	int time = 10;
 	while (true)
 	{
@@ -55,6 +59,9 @@ DWORD WINAPI Thread1(LPVOID lp)
 		if (time == 0)
 			break;
 	}
+	SetWindowText((HWND)lp, TEXT("Осталось времени: 0 секунд"));
+	SetPriorityClass(GetCurrentProcess(), prior_proc);
+	SetThreadPriority(GetCurrentThread(), prior_thread);
 	MessageBox((HWND)lp, TEXT("Время вышло"), TEXT("Тест"), MB_OK);
 	EndDialog((HWND)lp, 0);
 }
